@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33403.182
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QoL", "QoL\QoL.csproj", "{F79A16C1-CF8E-4EA3-8EA0-25222F85A17E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F79A16C1-CF8E-4EA3-8EA0-25222F85A17E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F79A16C1-CF8E-4EA3-8EA0-25222F85A17E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F79A16C1-CF8E-4EA3-8EA0-25222F85A17E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F79A16C1-CF8E-4EA3-8EA0-25222F85A17E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {557AAC4D-EB92-4975-BFEA-7C2E507FE782}
+	EndGlobalSection
+EndGlobal
