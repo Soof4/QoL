@@ -12,7 +12,7 @@ namespace CheatShame {
     public class CheatShame : TerrariaPlugin {
 
         public override string Name => "QoL";
-        public override Version Version => new Version(1, 0, 1);
+        public override Version Version => new Version(1, 0, 2);
         public override string Author => "Soofa";
         public override string Description => "Quality of life.";
 
@@ -121,7 +121,8 @@ namespace CheatShame {
         }
 
         private void OnChestOpen(object? sender, GetDataHandlers.ChestOpenEventArgs args) {
-            if (DungeonWallIDs.Contains(Main.tile[args.X, args.Y].wall) && !NPC.downedBoss3) {
+            if ((DungeonWallIDs.Contains(Main.tile[args.X, args.Y].wall) && !NPC.downedBoss3) ||  // dungeon chests
+                Main.tile[args.X, args.Y].type == 21 && args.Y > Main.UnderworldLayer && !NPC.downedBoss3) {  // shadow chests
                 args.Handled = true;
             }
         }
