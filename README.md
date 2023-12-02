@@ -19,7 +19,6 @@ A TShock plugin that adds various Quality of Life features
 * New command ``/voteban`` will start a voting process to ban the target player.
 * New command ``/vote`` will vote for/against the current voting process.
 * New whitelist system based on character names.
-* A config file to enable/disable any features. (You need to restart the server to apply changes. ``/reload`` is not enough.)
 
 ## Configuration
 Here is an example config file:
