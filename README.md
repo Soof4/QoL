@@ -1,5 +1,5 @@
 # QoL
-A TShock plugin that adds various Quality of Life features
+A TShock plugin that adds various Quality of Life features.
 
 ## Permissions
 | Permissions  | Commands |
@@ -13,7 +13,7 @@ A TShock plugin that adds various Quality of Life features
 * Despawning Queen Bee if there is no players within 450 blocks.
 * Making dungeon chests and shadow chests _unopenable_ until Skeletron is dead.
 * Overrides TShock's built-in ``/item`` command to show items in chat when the item is not found. <br>
-  _**Note:** If you're using TShock in another language than English, all the texts related to ``/item`` command will be in English._
+  _**Note:** If you're using TShock in another language other than English, all the texts related to ``/item`` command will be in English._
 * New command ``/luck`` will show your luck in chat.
 * New command ``/votekick`` will start a voting process to kick the target player.
 * New command ``/voteban`` will start a voting process to ban the target player.
