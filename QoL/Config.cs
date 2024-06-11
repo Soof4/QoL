@@ -12,6 +12,7 @@ namespace QoL {
         public bool EnableVotebanCommand = true;
         public int VotebanTimeInMinutes = 60;
         public bool EnableVotekickCommand = true;
+        public bool DisableQuickStack = false;
         public bool EnableNameWhitelist = false;
         public string[] WhitelistedNames = new string[0];
         

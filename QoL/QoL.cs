@@ -14,7 +14,7 @@ namespace QoL
     {
 
         public override string Name => "QoL";
-        public override Version Version => new Version(1, 1, 1);
+        public override Version Version => new Version(1, 1, 2);
         public override string Author => "Soofa";
         public override string Description => "Quality of life.";
 
@@ -43,11 +43,10 @@ namespace QoL
                 Config.Write();
             }
 
-            if (Config.LockDungeonChestsTillSkeletron || Config.LockShadowChestsTillSkeletron)
-            {
-                GetDataHandlers.ChestOpen += OnChestOpen;
-            }
+            ServerApi.Hooks.GamePostInitialize.Register(this, OnGamePostInitialize);
 
+            if (Config.LockDungeonChestsTillSkeletron || Config.LockShadowChestsTillSkeletron) GetDataHandlers.ChestOpen += OnChestOpen;
+            
             if (Config.QueenBeeRangeCheck)
             {
                 ServerApi.Hooks.GameUpdate.Register(this, OnGameUpdate);
@@ -102,16 +101,25 @@ namespace QoL
                 ServerApi.Hooks.ServerLeave.Register(this, OnServerLeave);
             }
 
-            if (Config.EnableNameWhitelist)
-            {
-                ServerApi.Hooks.ServerJoin.Register(this, OnServerJoin);
-            }
+            if (Config.EnableNameWhitelist) ServerApi.Hooks.ServerJoin.Register(this, OnServerJoin);
+            if (Config.DisableQuickStack) ServerApi.Hooks.ItemForceIntoChest.Register(this, OnItemForceIntoChest);
 
             Commands.ChatCommands.Add(new Command("qol.execute", ExecuteCmd, "execute", "exe")
             {
                 AllowServer = true,
                 HelpText = "Executes multiple commands."
             });
+        }
+
+        private void OnItemForceIntoChest(ForceItemIntoChestEventArgs args)
+        {
+            args.Handled = true;
+        }
+
+
+        private void OnGamePostInitialize(EventArgs args)
+        {
+            Main.rand ??= new();
         }
 
         private void OnServerJoin(JoinEventArgs args)
@@ -135,7 +143,8 @@ namespace QoL
         {
             string[] cmds = string.Join(" ", args.Parameters).Split("&");
 
-            foreach (string cmd in cmds) {
+            foreach (string cmd in cmds)
+            {
                 Commands.HandleCommand(args.Player, cmd.Trim());
             }
         }
