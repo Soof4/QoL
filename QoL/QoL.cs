@@ -14,7 +14,7 @@ namespace QoL
     {
 
         public override string Name => "QoL";
-        public override Version Version => new Version(1, 1, 2);
+        public override Version Version => new Version(1, 2, 0);
         public override string Author => "Soofa";
         public override string Description => "Quality of life.";
 
@@ -112,10 +112,10 @@ namespace QoL
                 HelpText = "Executes multiple commands."
             });
 
-            Commands.ChatCommands.Add(new Command("qol.info", InfoCmd, "info")
+            Commands.ChatCommands.Add(new Command("qol.iteminfo", InfoCmd, "iteminfo", "ii")
             {
                 AllowServer = true,
-                HelpText = "Shows item info"
+                HelpText = "Shows item info. Usage: /iteminfo <item name>"
             });
         }
 
