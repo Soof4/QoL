@@ -32,6 +32,8 @@ namespace QoL
         private static string OngoingVoteUUID = "";
         private static int OngoingVoteCount = 0;
         private static Dictionary<string, bool> OngoingVoters = new Dictionary<string, bool>();
+        private static int[] PlatformTileIDs = new int[] { 19, 427, 435, 436, 437, 438, 439 };
+
         public override void Initialize()
         {
             if (File.Exists(ConfigPath))
@@ -46,7 +48,7 @@ namespace QoL
             ServerApi.Hooks.GamePostInitialize.Register(this, OnGamePostInitialize);
 
             if (Config.LockDungeonChestsTillSkeletron || Config.LockShadowChestsTillSkeletron) GetDataHandlers.ChestOpen += OnChestOpen;
-            
+
             if (Config.QueenBeeRangeCheck)
             {
                 ServerApi.Hooks.GameUpdate.Register(this, OnGameUpdate);
@@ -109,7 +111,102 @@ namespace QoL
                 AllowServer = true,
                 HelpText = "Executes multiple commands."
             });
+
+            Commands.ChatCommands.Add(new Command("qol.info", InfoCmd, "info")
+            {
+                AllowServer = true,
+                HelpText = "Shows item info"
+            });
         }
+
+        private static void InfoCmd(CommandArgs args)
+        {
+            string itemName = string.Join(" ", args.Parameters);
+
+            if (args.Parameters.Count < 1)
+            {
+                args.Player.SendErrorMessage("Please specify an item name.");
+                return;
+            }
+
+            List<Item> items = TShock.Utils.GetItemByIdOrName(itemName);
+
+            if (items.Count < 1)
+            {
+                args.Player.SendErrorMessage($"{itemName} not found.");
+                return;
+            }
+
+            Item _item = ContentSamples.ItemsByType[items[0].type];
+
+            string msg = $"Info about {_item.Name} ([i:{_item.type}]):";
+
+            msg += $"\nRarity: {Utils.GetRarityColorText(_item.OriginalRarity)}";
+            if (_item.damage > 0) msg += $"\nDamage: {_item.damage} ({_item.GetDamageTypeText()})";
+            if (_item.crit != 0) msg += $"\nCrit chance: {_item.crit}";
+            if (_item.defense != 0) msg += $"\nDefense: {_item.defense}";
+            if (_item.pick != 0) msg += $"\nPickaxe power: {_item.pick}%";
+            if (_item.axe != 0) msg += $"\nAxe power: {_item.axe}%";
+            if (_item.hammer != 0) msg += $"\nHammer power: {_item.hammer}%";
+            if (_item.bait != 0) msg += $"\nBait power: {_item.bait}%";
+
+            msg += "\nRecipes:";
+            int recipeCount = 0;
+            int type = _item.type;
+
+            for (int i = 0; i < Recipe.maxRecipes; i++)
+            {
+                Recipe recipe = Main.recipe[i];
+                if (recipe.createItem.type == 0)
+                {
+                    break;
+                }
+
+                if (recipe.createItem.type != _item.type)
+                {
+                    continue;
+                }
+
+                recipeCount++;
+                string rec = $"\n{recipeCount}. ";
+
+                for (int j = 0; j < Recipe.maxRequirements; j++)
+                {
+                    Item item = recipe.requiredItem[j];
+
+                    if (item.type == 0)
+                    {
+                        break;
+                    }
+
+                    if (Main.guideItem.IsTheSameAs(item) ||
+                        recipe.useWood(type, item.type) ||
+                        recipe.useSand(type, item.type) ||
+                        recipe.useIronBar(type, item.type) ||
+                        recipe.useFragment(type, item.type) ||
+                        recipe.AcceptedByItemGroups(type, item.type) ||
+                        recipe.usePressurePlate(type, item.type))
+                    {
+                        Main.availableRecipe[Main.numAvailableRecipes] = i;
+                        Main.numAvailableRecipes++;
+                        break;
+                    }
+
+                    rec += $"[i/s{item.stack}:{item.type}]";
+                }
+
+                msg += rec;
+            }
+
+            if (recipeCount == 0)
+            {
+                msg += "\nUncraftable";
+            }
+
+            args.Player.SendInfoMessage(msg);
+        }
+
+
 
         private void OnItemForceIntoChest(ForceItemIntoChestEventArgs args)
         {
