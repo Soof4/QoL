@@ -18,21 +18,22 @@ namespace QoL
         public override string Author => "Soofa";
         public override string Description => "Quality of life.";
 
-        public QoL(Main game) : base(game) { }
+        public QoL(Main game) : base(game) => Instance = this;
+        public static TerrariaPlugin? Instance;
         public static DateTime time = DateTime.UtcNow;
         public static List<int> QueenBeeIndexList = new();
-        int[] DungeonWallIDs = { 7, 8, 9, 94, 95, 96, 97, 98, 99 };
+        public static int[] DungeonWallIDs = { 7, 8, 9, 94, 95, 96, 97, 98, 99 };
         public static string ConfigPath = Path.Combine(TShock.SavePath + "/QoLConfig.json");
         public static Config Config = new Config();
-        private static bool OngoingVoteActive = false;
-        private static int OngoingVoteType = -1;    // 0: Votekick, 1: Voteban
-        private static string OngoingVoteAccountName = "";
-        private static string OngoingVoteInGameName = "";
-        private static string OngoingVoteIPAddress = "";
-        private static string OngoingVoteUUID = "";
-        private static int OngoingVoteCount = 0;
-        private static Dictionary<string, bool> OngoingVoters = new Dictionary<string, bool>();
-        private static int[] PlatformTileIDs = new int[] { 19, 427, 435, 436, 437, 438, 439 };
+        public static bool OngoingVoteActive = false;
+        public static int OngoingVoteType = -1;    // 0: Votekick, 1: Voteban
+        public static string OngoingVoteAccountName = "";
+        public static string OngoingVoteInGameName = "";
+        public static string OngoingVoteIPAddress = "";
+        public static string OngoingVoteUUID = "";
+        public static int OngoingVoteCount = 0;
+        public static Dictionary<string, bool> OngoingVoters = new Dictionary<string, bool>();
+        public static int[] PlatformTileIDs = new int[] { 19, 427, 435, 436, 437, 438, 439 };
 
         public override void Initialize()
         {
@@ -45,15 +46,7 @@ namespace QoL
                 Config.Write();
             }
 
-            ServerApi.Hooks.GamePostInitialize.Register(this, OnGamePostInitialize);
-
-            if (Config.LockDungeonChestsTillSkeletron || Config.LockShadowChestsTillSkeletron) GetDataHandlers.ChestOpen += OnChestOpen;
-
-            if (Config.QueenBeeRangeCheck)
-            {
-                ServerApi.Hooks.GameUpdate.Register(this, OnGameUpdate);
-                ServerApi.Hooks.NpcSpawn.Register(this, OnNpcSpawn);
-            }
+            Handlers.InitializeHandlers();
 
             if (Config.EnableLuckCommand)
             {
@@ -100,11 +93,8 @@ namespace QoL
                     HelpText = "Vote for current voting"
                 });
 
-                ServerApi.Hooks.ServerLeave.Register(this, OnServerLeave);
+                ServerApi.Hooks.ServerLeave.Register(this, Handlers.OnServerLeave);
             }
-
-            if (Config.EnableNameWhitelist) ServerApi.Hooks.ServerJoin.Register(this, OnServerJoin);
-            if (Config.DisableQuickStack) ServerApi.Hooks.ItemForceIntoChest.Register(this, OnItemForceIntoChest);
 
             Commands.ChatCommands.Add(new Command("qol.execute", ExecuteCmd, "execute", "exe")
             {
@@ -204,36 +194,6 @@ namespace QoL
             }
 
             args.Player.SendInfoMessage(msg);
-        }
-
-
-
-        private void OnItemForceIntoChest(ForceItemIntoChestEventArgs args)
-        {
-            args.Handled = true;
-        }
-
-
-        private void OnGamePostInitialize(EventArgs args)
-        {
-            Main.rand ??= new();
-        }
-
-        private void OnServerJoin(JoinEventArgs args)
-        {
-            if (!Config.WhitelistedNames.Contains(TShock.Players[args.Who].Name))
-            {
-                NetMessage.TrySendData((int)PacketTypes.Disconnect, args.Who, -1, Terraria.Localization.NetworkText.FromLiteral(TShock.Config.Settings.WhitelistKickReason));
-            }
-        }
-
-        private void OnServerLeave(LeaveEventArgs args)
-        {
-            if (OngoingVoters.ContainsKey(TShock.Players[args.Who].Name))
-            {
-                OngoingVoteCount += OngoingVoters[TShock.Players[args.Who].Name] ? -1 : 1;
-                OngoingVoters.Remove(TShock.Players[args.Who].Name);
-            }
         }
 
         private void ExecuteCmd(CommandArgs args)
@@ -550,63 +510,6 @@ namespace QoL
             }
         }
 
-        private void OnChestOpen(object? sender, GetDataHandlers.ChestOpenEventArgs args)
-        {
-            if (Config.LockDungeonChestsTillSkeletron &&
-                DungeonWallIDs.Contains(Main.tile[args.X, args.Y].wall) &&
-                !NPC.downedBoss3)
-            {
-                args.Handled = true;
-            }
-            else if (Config.LockShadowChestsTillSkeletron &&
-                Main.tile[args.X, args.Y].type == 21 &&
-                Main.tile[args.X, args.Y].frameX / 36 == 3 &&
-                !NPC.downedBoss3)
-            {
-                args.Handled = true;
-            }
-        }
-
-        private void OnNpcSpawn(NpcSpawnEventArgs args)
-        {
-            if (Main.npc[args.NpcId].netID == NPCID.QueenBee)
-            {
-                QueenBeeIndexList.Add(args.NpcId);
-            }
-        }
-
-        private void OnGameUpdate(EventArgs args)
-        {
-            int[] indexesToRemove = { };
-            foreach (int queenIndex in QueenBeeIndexList)
-            {
-                NPC queenBee = Main.npc[queenIndex];
-
-                bool isFarAway = true;
-                for (int i = 0; i < TShock.Config.Settings.MaxSlots + TShock.Config.Settings.ReservedSlots; i++)
-                {
-                    TSPlayer? plr = TShock.Players[i];
-                    if (plr != null && plr.Active && !plr.Dead && queenBee.position.WithinRange(plr.TPlayer.position, 16 * 450))
-                    {
-                        isFarAway = false;
-                    }
-                }
-
-                if (isFarAway)
-                {
-                    queenBee.active = false;
-                    queenBee.type = 0;
-                    indexesToRemove.Append(queenIndex);
-                    NetMessage.SendData((int)PacketTypes.NpcUpdate, number: queenIndex);
-                }
-            }
-
-            foreach (int index in indexesToRemove)
-            {
-                QueenBeeIndexList.Remove(index);
-            }
-        }
-
         private void LuckCmd(CommandArgs args)
         {
             args.Player.SendInfoMessage($"Your luck is {args.Player.TPlayer.luck}.");
@@ -616,8 +519,7 @@ namespace QoL
         {
             if (disposing)
             {
-                ServerApi.Hooks.GameUpdate.Deregister(this, OnGameUpdate);
-                ServerApi.Hooks.NpcSpawn.Deregister(this, OnNpcSpawn);
+                Handlers.DisposeHandlers();
             }
             base.Dispose(disposing);
         }
