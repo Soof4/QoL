@@ -12,6 +12,8 @@ namespace QoL
         {
             ServerApi.Hooks.GamePostInitialize.Register(QoL.Instance, OnGamePostInitialize);
             GeneralHooks.ReloadEvent += OnReload;
+            ServerApi.Hooks.ServerLeave.Register(QoL.Instance, OnServerLeave);
+
 
             if (QoL.Config.LockDungeonChestsTillSkeletron || QoL.Config.LockShadowChestsTillSkeletron)
             {
@@ -37,7 +39,7 @@ namespace QoL
 
         private static void OnReload(ReloadEventArgs args)
         {
-            QoL.Config = Config.Read();
+            QoL.Config = Config.Reload();
             ReloadHandlers();
             args.Player.SendSuccessMessage("[QoL] Reloaded.");
         }
@@ -46,6 +48,8 @@ namespace QoL
         {
             ServerApi.Hooks.GamePostInitialize.Deregister(QoL.Instance, OnGamePostInitialize);
             GeneralHooks.ReloadEvent -= OnReload;
+            ServerApi.Hooks.ServerLeave.Deregister(QoL.Instance, OnServerLeave);
+
 
             if (QoL.Config.LockDungeonChestsTillSkeletron || QoL.Config.LockShadowChestsTillSkeletron)
             {
@@ -130,10 +134,10 @@ namespace QoL
 
         public static void OnServerLeave(LeaveEventArgs args)
         {
-            if (QoL.OngoingVoters.ContainsKey(TShock.Players[args.Who].Name))
+            if (Commands.OngoingVoters.ContainsKey(TShock.Players[args.Who].Name))
             {
-                QoL.OngoingVoteCount += QoL.OngoingVoters[TShock.Players[args.Who].Name] ? -1 : 1;
-                QoL.OngoingVoters.Remove(TShock.Players[args.Who].Name);
+                Commands.OngoingVoteCount += Commands.OngoingVoters[TShock.Players[args.Who].Name] ? -1 : 1;
+                Commands.OngoingVoters.Remove(TShock.Players[args.Who].Name);
             }
         }
 
