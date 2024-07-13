@@ -11,6 +11,7 @@ A TShock plugin that adds various Quality of Life features.
 | qol.iteminfo | iteminfo, ii |
 
 ## Features
+* Drop fragments for each player that deals damage to the pillar (like how Treasure Bags work!).
 * Despawning Queen Bee if there is no players within 450 blocks.
 * Making dungeon chests and shadow chests _unopenable_ until Skeletron is dead.
 * Overrides TShock's built-in ``/item`` command to show items in chat when the item is not found. <br>
@@ -26,6 +27,7 @@ A TShock plugin that adds various Quality of Life features.
 Here is an example config file:
 ```json
 {
+  "FragmentsFunctionLikeTreasureBags": true,
   "QueenBeeRangeCheck": true,
   "LockDungeonChestsTillSkeletron": true,
   "LockShadowChestsTillSkeletron": true,

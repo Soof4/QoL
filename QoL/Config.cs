@@ -6,6 +6,7 @@ namespace QoL
 {
     public class Config
     {
+        public bool FragmentsFunctionLikeTreasureBags = true;
         public bool QueenBeeRangeCheck = true;
         public bool LockDungeonChestsTillSkeletron = true;
         public bool LockShadowChestsTillSkeletron = true;
