@@ -2,6 +2,7 @@ using TerrariaApi.Server;
 using TShockAPI;
 using TShockAPI.Hooks;
 using Terraria;
+using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
 
 namespace QoL
@@ -11,9 +12,13 @@ namespace QoL
         public static void InitializeHandlers()
         {
             ServerApi.Hooks.GamePostInitialize.Register(QoL.Instance, OnGamePostInitialize);
-            GeneralHooks.ReloadEvent += OnReload;
             ServerApi.Hooks.ServerLeave.Register(QoL.Instance, OnServerLeave);
+            GeneralHooks.ReloadEvent += OnReload;
 
+            if (QoL.Config.FragmentsFunctionLikeTreasureBags)
+            {
+                ServerApi.Hooks.NpcLootDrop.Register(QoL.Instance, OnNpcLootDrop);
+            }
 
             if (QoL.Config.LockDungeonChestsTillSkeletron || QoL.Config.LockShadowChestsTillSkeletron)
             {
@@ -56,6 +61,11 @@ namespace QoL
                 GetDataHandlers.ChestOpen -= OnChestOpen;
             }
 
+            if (QoL.Config.FragmentsFunctionLikeTreasureBags)
+            {
+                ServerApi.Hooks.NpcLootDrop.Deregister(QoL.Instance, OnNpcLootDrop);
+            }
+
             if (QoL.Config.QueenBeeRangeCheck)
             {
                 ServerApi.Hooks.GameUpdate.Deregister(QoL.Instance, OnGameUpdate);
@@ -82,6 +92,15 @@ namespace QoL
             else
             {
                 GetDataHandlers.ChestOpen -= OnChestOpen;
+            }
+
+            if (QoL.Config.FragmentsFunctionLikeTreasureBags)
+            {
+                ServerApi.Hooks.NpcLootDrop.Register(QoL.Instance, OnNpcLootDrop);
+            }
+            else
+            {
+                ServerApi.Hooks.NpcLootDrop.Deregister(QoL.Instance, OnNpcLootDrop);
             }
 
             if (QoL.Config.QueenBeeRangeCheck)
@@ -138,6 +157,54 @@ namespace QoL
             {
                 Commands.OngoingVoteCount += Commands.OngoingVoters[TShock.Players[args.Who].Name] ? -1 : 1;
                 Commands.OngoingVoters.Remove(TShock.Players[args.Who].Name);
+            }
+        }
+
+        private static void OnNpcLootDrop(NpcLootDropEventArgs args)
+        {
+            //default vanilla config for fragments
+            DropOneByOne.Parameters parameters = default(DropOneByOne.Parameters);
+            parameters.MinimumItemDropsCount = 12;
+            parameters.MaximumItemDropsCount = 20;
+            parameters.ChanceNumerator = 1;
+            parameters.ChanceDenominator = 1;
+            parameters.MinimumStackPerChunkBase = 1;
+            parameters.MaximumStackPerChunkBase = 3;
+            parameters.BonusMinDropsPerChunkPerPlayer = 0;
+            parameters.BonusMaxDropsPerChunkPerPlayer = 0;
+
+            if (Main.expertMode || Main.masterMode)
+            {
+                parameters.BonusMinDropsPerChunkPerPlayer = 1;
+                parameters.BonusMaxDropsPerChunkPerPlayer = 1;
+                parameters.MinimumStackPerChunkBase = 1;
+                parameters.MaximumStackPerChunkBase = 4;
+            }
+
+            NPC npc = Main.npc[args.NpcArrayIndex];
+            if (npc.netID == NPCID.LunarTowerSolar || npc.netID == NPCID.LunarTowerVortex || npc.netID == NPCID.LunarTowerNebula || npc.netID == NPCID.LunarTowerStardust)
+            {
+                for (int plrIndex = 0; plrIndex < 255; plrIndex++)
+                {
+                    Player player = Main.player[plrIndex];
+                    if (player.active && npc.playerInteraction[plrIndex] && player.RollLuck(1) < 1) //amount of fragments for each player will depend on that player's luck
+                    {
+                        npc.playerInteraction[plrIndex] = false; //set this to false to prevent this hook from running multiple times since it will be called for each chunk of fragments was dropped.
+                        int num = Main.rand.Next(parameters.MinimumItemDropsCount, parameters.MaximumItemDropsCount + 1);
+                        int minValue = parameters.MinimumStackPerChunkBase + parameters.BonusMinDropsPerChunkPerPlayer;
+                        int num2 = parameters.MaximumStackPerChunkBase + parameters.BonusMaxDropsPerChunkPerPlayer;
+                        for (int i = 0; i < num; i++)
+                        {
+                            int x = (int)npc.position.X + Main.rand.Next(npc.width + 1);
+                            int y = (int)npc.position.Y + Main.rand.Next(npc.height + 1);
+                            int itemIndex = Item.NewItem(npc.GetItemSource_Loot(), x, y, 0, 0, args.ItemId, Main.rand.Next(minValue, num2 + 1), true, -1);
+                            Main.timeItemSlotCannotBeReusedFor[itemIndex] = 54000;
+                            NetMessage.SendData(90, plrIndex, -1, null, itemIndex);
+                            Main.item[itemIndex].active = false;
+                        }
+                    }
+                }
+                args.Handled = true;
             }
         }
 
