@@ -14,8 +14,8 @@ namespace QoL
     {
 
         public override string Name => "QoL";
-        public override Version Version => new Version(1, 2, 2);
-        public override string Author => "Soofa";
+        public override Version Version => new Version(1, 2, 3);
+        public override string Author => "Soofa & Sors";
         public override string Description => "Quality of life.";
 
         public QoL(Main game) : base(game) => Instance = this;
