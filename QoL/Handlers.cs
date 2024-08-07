@@ -135,6 +135,7 @@ namespace QoL
 
         private static void OnItemForceIntoChest(ForceItemIntoChestEventArgs args)
         {
+            args.Item = new Item();
             args.Handled = true;
         }
 
