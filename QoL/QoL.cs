@@ -14,7 +14,7 @@ namespace QoL
     {
 
         public override string Name => "QoL";
-        public override Version Version => new Version(1, 2, 4);
+        public override Version Version => new Version(1, 2, 5);
         public override string Author => "Soofa & Sors";
         public override string Description => "Quality of life.";
 

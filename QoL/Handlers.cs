@@ -155,10 +155,10 @@ namespace QoL
 
         public static void OnServerLeave(LeaveEventArgs args)
         {
-            if (Commands.OngoingVoters.ContainsKey(TShock.Players[args.Who].Name))
+            if (Commands.OngoingVoters.ContainsKey(Main.player[args.Who].name))
             {
-                Commands.OngoingVoteCount += Commands.OngoingVoters[TShock.Players[args.Who].Name] ? -1 : 1;
-                Commands.OngoingVoters.Remove(TShock.Players[args.Who].Name);
+                Commands.OngoingVoteCount += Commands.OngoingVoters[Main.player[args.Who].name] ? -1 : 1;
+                Commands.OngoingVoters.Remove(Main.player[args.Who].name);
             }
         }
 
