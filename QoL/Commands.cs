@@ -1,8 +1,5 @@
-using System.IO.Streams;
 using Terraria;
-using Terraria.GameContent.NetModules;
 using Terraria.ID;
-using Terraria.Net;
 using TShockAPI;
 using TShockAPI.Localization;
 
@@ -135,54 +132,60 @@ namespace QoL
 
         private static void BuilderCmd(CommandArgs args)
         {
-            TSPlayer plr = args.Player;
-            MemoryStream stream = new MemoryStream();
-            BinaryWriter bw = new BinaryWriter(stream);
+            BitsByte plrdifficulty = new BitsByte();
+            BitsByte misc = new BitsByte();
+            BitsByte pernamentupgr = new BitsByte();
 
-            bw.Write((short)0);
-            bw.Write((byte)PacketTypes.PlayerInfo);
-            bw.Write((byte)plr.Index);
-            bw.Write((byte)plr.TPlayer.skinVariant);
-            bw.Write((byte)plr.TPlayer.hair);
-            bw.Write(plr.Name);
-            bw.Write(plr.TPlayer.hairDye);
+            plrdifficulty[0] = plrdifficulty[1] = false; 
+            plrdifficulty[2] = args.TPlayer.extraAccessory; 
+            plrdifficulty[3] = true; //creative mode, tshock doc did not update this (and a lot more other things) lead to falsely transfered information
+            misc[0] = args.TPlayer.UsingBiomeTorches;
+            misc[1] = args.TPlayer.happyFunTorchTime;
+            misc[2] = args.TPlayer.unlockedSuperCart;
+            misc[3] = args.TPlayer.enabledSuperCart;
+            pernamentupgr[0] = args.TPlayer.usedAegisCrystal;
+            pernamentupgr[1] = args.TPlayer.usedAegisFruit;
+            pernamentupgr[2] = args.TPlayer.usedArcaneCrystal;
+            pernamentupgr[3] = args.TPlayer.usedGalaxyPearl;
+            pernamentupgr[4] = args.TPlayer.usedGummyWorm;
+            pernamentupgr[5] = args.TPlayer.usedAmbrosia;
+            pernamentupgr[6] = args.TPlayer.ateArtisanBread;
 
-            ushort num = 0;
-            for (int i = 0; i < plr.TPlayer.hideVisibleAccessory.Length; i++)
-            {
-                if (plr.TPlayer.hideVisibleAccessory[i])
-                {
-                    num = (ushort)(num | (ushort)(1 << i));
-                }
-            }
+            byte[] playerInfo = new PacketFactory()
+                    .SetPacketType((short)PacketTypes.PlayerInfo)
+                    .PackByte((byte)args.Player.Index)
+                    .PackByte((byte)args.TPlayer.skinVariant)
+                    .PackByte((byte)args.TPlayer.hair)
+                    .PackString(args.TPlayer.name)
+                    .PackByte(args.TPlayer.hairDye)
+                    .PackAccessoryVisibility(args.TPlayer.hideVisibleAccessory)
+                    .PackByte(args.TPlayer.hideMisc)
+                    .PackColor(args.TPlayer.hairColor)
+                    .PackColor(args.TPlayer.skinColor)
+                    .PackColor(args.TPlayer.eyeColor)
+                    .PackColor(args.TPlayer.shirtColor)
+                    .PackColor(args.TPlayer.underShirtColor)
+                    .PackColor(args.TPlayer.pantsColor)
+                    .PackColor(args.TPlayer.shoeColor)
+                    .PackByte(plrdifficulty)
+                    .PackByte(misc)
+                    .PackByte(pernamentupgr)
+                    .GetByteData();
 
-            bw.Write(num);
-            bw.Write(plr.TPlayer.hideMisc);
-            bw.Write(plr.TPlayer.hairColor.PackedValue);
-            bw.Write(plr.TPlayer.skinColor.PackedValue);
-            bw.Write(plr.TPlayer.eyeColor.PackedValue);
-            bw.Write(plr.TPlayer.shirtColor.PackedValue);
-            bw.Write(plr.TPlayer.underShirtColor.PackedValue);
-            bw.Write(plr.TPlayer.pantsColor.PackedValue);
-            bw.Write(plr.TPlayer.shoeColor.PackedValue);
-            bw.Write((byte)8);
-
-            long length = bw.BaseStream.Position;
-
-            bw.Seek(0, SeekOrigin.Begin);
-            bw.Write((ushort)length);
-
-            plr.SendRawData(stream.ToArray());
-
-            stream.Close();
-            bw.Close();
+            args.Player.SendRawData(playerInfo);
 
             // Unlock everything
-            for (var i = 0; i < ItemID.Count; i++)
+            for (short i = 0; i < ItemID.Count; i++)
             {
-                plr.TPlayer.creativeTracker.ItemSacrifices.RegisterItemSacrifice(i, 9999);
-                var _response = NetCreativeUnlocksModule.SerializeItemSacrifice(i, 9999);
-                NetManager.Instance.SendToClient(_response, plr.Index);
+                //old method also works!
+                byte[] creativeUnlock = new PacketFactory(writeExtraOffsetForNetModule: true)
+                        .SetPacketType((short)PacketTypes.LoadNetModule)
+                        .SetNetModuleType(5)
+                        .PackInt16(i)
+                        .PackUInt16(9999)
+                        .GetByteData();
+
+                args.Player.SendRawData(creativeUnlock);
             }
         }
 

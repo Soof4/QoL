@@ -4,8 +4,6 @@ using TShockAPI.Hooks;
 using Terraria;
 using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
-using TShockAPI.DB;
-using System.IO.Streams;
 
 namespace QoL
 {
@@ -137,7 +135,6 @@ namespace QoL
 
         private static void OnItemForceIntoChest(ForceItemIntoChestEventArgs args)
         {
-            args.Item = new Item();
             args.Handled = true;
         }
 
