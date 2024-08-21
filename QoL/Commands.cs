@@ -1,5 +1,8 @@
+using System.IO.Streams;
 using Terraria;
+using Terraria.GameContent.NetModules;
 using Terraria.ID;
+using Terraria.Net;
 using TShockAPI;
 using TShockAPI.Localization;
 
@@ -65,10 +68,17 @@ namespace QoL
                        );
 
             AddCommand(permissions: "qol.iteminfo",
-                       cmd: VoteCmd,
+                       cmd: InfoCmd,
                        names: new string[] { "iteminfo", "ii" },
                        allowServer: true,
                        helpText: "Shows item info. Usage: /iteminfo <item name>"
+                       );
+
+            AddCommand(permissions: "qol.builder",
+                       cmd: BuilderCmd,
+                       names: "builder",
+                       allowServer: false,
+                       helpText: "Instantiates the journey mode menu."
                        );
         }
 
@@ -123,6 +133,58 @@ namespace QoL
                        doLog);
         }
 
+        private static void BuilderCmd(CommandArgs args)
+        {
+            TSPlayer plr = args.Player;
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter bw = new BinaryWriter(stream);
+
+            bw.Write((short)0);
+            bw.Write((byte)PacketTypes.PlayerInfo);
+            bw.Write((byte)plr.Index);
+            bw.Write((byte)plr.TPlayer.skinVariant);
+            bw.Write((byte)plr.TPlayer.hair);
+            bw.Write(plr.Name);
+            bw.Write(plr.TPlayer.hairDye);
+
+            ushort num = 0;
+            for (int i = 0; i < plr.TPlayer.hideVisibleAccessory.Length; i++)
+            {
+                if (plr.TPlayer.hideVisibleAccessory[i])
+                {
+                    num = (ushort)(num | (ushort)(1 << i));
+                }
+            }
+
+            bw.Write(num);
+            bw.Write(plr.TPlayer.hideMisc);
+            bw.Write(plr.TPlayer.hairColor.PackedValue);
+            bw.Write(plr.TPlayer.skinColor.PackedValue);
+            bw.Write(plr.TPlayer.eyeColor.PackedValue);
+            bw.Write(plr.TPlayer.shirtColor.PackedValue);
+            bw.Write(plr.TPlayer.underShirtColor.PackedValue);
+            bw.Write(plr.TPlayer.pantsColor.PackedValue);
+            bw.Write(plr.TPlayer.shoeColor.PackedValue);
+            bw.Write((byte)8);
+
+            long length = bw.BaseStream.Position;
+
+            bw.Seek(0, SeekOrigin.Begin);
+            bw.Write((ushort)length);
+
+            plr.SendRawData(stream.ToArray());
+
+            stream.Close();
+            bw.Close();
+
+            // Unlock everything
+            for (var i = 0; i < ItemID.Count; i++)
+            {
+                plr.TPlayer.creativeTracker.ItemSacrifices.RegisterItemSacrifice(i, 9999);
+                var _response = NetCreativeUnlocksModule.SerializeItemSacrifice(i, 9999);
+                NetManager.Instance.SendToClient(_response, plr.Index);
+            }
+        }
 
         private static void InfoCmd(CommandArgs args)
         {
