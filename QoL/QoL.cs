@@ -1,9 +1,6 @@
 ﻿using Terraria;
-using Terraria.ID;
 using TerrariaApi.Server;
 using TShockAPI;
-using TShockAPI.Hooks;
-using TShockAPI.Localization;
 
 
 namespace QoL
@@ -14,7 +11,7 @@ namespace QoL
     {
 
         public override string Name => "QoL";
-        public override Version Version => new Version(1, 2, 5);
+        public override Version Version => new Version(1, 2, 6);
         public override string Author => "Soofa & Sors";
         public override string Description => "Quality of life.";
 

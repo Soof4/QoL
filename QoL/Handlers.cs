@@ -4,8 +4,6 @@ using TShockAPI.Hooks;
 using Terraria;
 using Terraria.GameContent.ItemDropRules;
 using Terraria.ID;
-using TShockAPI.DB;
-using System.IO.Streams;
 
 namespace QoL
 {
