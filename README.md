@@ -2,6 +2,8 @@
 
 A TShock plugin that adds various Quality of Life features.
 
+If you want to read this in another language: [Spanish](https://github.com/Soof4/QoL/blob/main/README_SPANISH.md)
+
 ## Permissions
 
 | Permissions  | Commands     |
