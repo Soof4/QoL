@@ -1,3 +1,4 @@
+using QoL.Enums;
 using Terraria;
 using Terraria.ID;
 using TShockAPI;
@@ -7,127 +8,71 @@ namespace QoL
 {
     public static class Commands
     {
-        public static bool OngoingVoteActive = false;
-        public static int OngoingVoteType = -1;    // 0: Votekick, 1: Voteban
-        public static string OngoingVoteAccountName = "";
-        public static string OngoingVoteInGameName = "";
-        public static string OngoingVoteIPAddress = "";
-        public static string OngoingVoteUUID = "";
-        public static int OngoingVoteCount = 0;
-        public static Dictionary<string, bool> OngoingVoters = new Dictionary<string, bool>();
         public static int[] PlatformTileIDs = new int[] { 19, 427, 435, 436, 437, 438, 439 };
 
         public static void InitializeCommands()
         {
 
-            AddCommand(permissions: "qol.luck",
-                       cmd: LuckCmd,
-                       names: "luck",
-                       allowServer: false,
-                       helpText: "Shows your luck. Usage: /luck"
-                       );
+            Utils.AddCommand(
+                permissions: "qol.luck",
+                cmd: LuckCmd,
+                names: "luck",
+                allowServer: false,
+                helpText: "Shows your luck. Usage: /luck"
+            );
 
             TShockAPI.Commands.ChatCommands.Remove(TShockAPI.Commands.ChatCommands.Find(cmd => cmd.Name.Equals("item")));
-            AddCommand(permissions: Permissions.item,
-                       cmd: ItemCmd,
-                       names: new string[] { "item", "i" },
-                       allowServer: false,
-                       helpText: "Gives yourself an item."
-                       );
 
-            AddCommand(permissions: "qol.voteban",
-                       cmd: VotebanCmd,
-                       names: "voteban",
-                       allowServer: true,
-                       helpText: "Starts a vote ban against a player. Usage: /voteban <name>"
-                       );
+            Utils.AddCommand(
+                permissions: Permissions.item,
+                cmd: ItemCmd,
+                names: new string[] { "item", "i" },
+                allowServer: false,
+                helpText: "Gives yourself an item."
+            );
 
-            AddCommand(permissions: "qol.votekick",
-                       cmd: VotekickCmd,
-                       names: "votekick",
-                       allowServer: true,
-                       helpText: "Starts a vote kick against a player. Usage: /votekick <name>"
-                       );
+            Utils.AddCommand(permissions: "qol.voteban",
+                cmd: VotebanCmd,
+                names: "voteban",
+                allowServer: true,
+                helpText: "Starts a vote ban against a player. Usage: /voteban <name>"
+            );
 
-            AddCommand(permissions: "qol.vote",
-                       cmd: VoteCmd,
-                       names: "vote",
-                       allowServer: true,
-                       helpText: "Vote for current voting. Usage: /vote <y/n>"
-                       );
+            Utils.AddCommand(permissions: "qol.votekick",
+                cmd: VotekickCmd,
+                names: "votekick",
+                allowServer: true,
+                helpText: "Starts a vote kick against a player. Usage: /votekick <name>"
+            );
 
-            AddCommand(permissions: "qol.execute",
-                       cmd: ExecuteCmd,
-                       names: new string[] { "execute", "exe" },
-                       allowServer: true,
-                       helpText: "Executes multiple commands. Usage: /execute [cmd1] & [cmd2] & [cmd3] ...\n" +
-                                 "Example: /execute wind 1 & worlevent sandstorm & broadcast \"Hello world!\""
-                       );
+            Utils.AddCommand(permissions: "qol.vote",
+                cmd: VoteCmd,
+                names: "vote",
+                allowServer: true,
+                helpText: "Vote for current voting. Usage: /vote <y/n>"
+            );
 
-            AddCommand(permissions: "qol.iteminfo",
-                       cmd: InfoCmd,
-                       names: new string[] { "iteminfo", "ii" },
-                       allowServer: true,
-                       helpText: "Shows item info. Usage: /iteminfo <item name>"
-                       );
+            Utils.AddCommand(permissions: "qol.execute",
+                cmd: ExecuteCmd,
+                names: new string[] { "execute", "exe" },
+                allowServer: true,
+                helpText: "Executes multiple commands. Usage: /execute [cmd1] & [cmd2] & [cmd3] ...\n" +
+                    "Example: /execute wind 1 & worlevent sandstorm & broadcast \"Hello world!\""
+            );
 
-            AddCommand(permissions: "qol.builder",
-                       cmd: BuilderCmd,
-                       names: "builder",
-                       allowServer: false,
-                       helpText: "Instantiates the journey mode menu."
-                       );
-        }
+            Utils.AddCommand(permissions: "qol.iteminfo",
+                cmd: InfoCmd,
+                names: new string[] { "iteminfo", "ii" },
+                allowServer: true,
+                helpText: "Shows item info. Usage: /iteminfo <item name>"
+            );
 
-        private static void AddCommand(string[] permissions,
-                                       CommandDelegate cmd,
-                                       string[] names,
-                                       bool allowServer = true,
-                                       string helpText = "No help available.",
-                                       string[]? helpDesc = null,
-                                       bool doLog = false)
-        {
-            TShockAPI.Commands.ChatCommands.Add(new Command(permissions.ToList(), cmd, names)
-            {
-                AllowServer = allowServer,
-                HelpText = helpText,
-                DoLog = doLog,
-                HelpDesc = helpDesc,
-            });
-        }
-
-        private static void AddCommand(string permissions,
-                                       CommandDelegate cmd,
-                                       string[] names,
-                                       bool allowServer = true,
-                                       string helpText = "No help available.",
-                                       string[]? helpDesc = null,
-                                       bool doLog = false)
-        {
-            AddCommand(new string[] { permissions },
-                       cmd,
-                       names,
-                       allowServer,
-                       helpText,
-                       helpDesc,
-                       doLog);
-        }
-
-        private static void AddCommand(string permissions,
-                                       CommandDelegate cmd,
-                                       string names,
-                                       bool allowServer = true,
-                                       string helpText = "No help available.",
-                                       string[]? helpDesc = null,
-                                       bool doLog = false)
-        {
-            AddCommand(new string[] { permissions },
-                       cmd,
-                       new string[] { names },
-                       allowServer,
-                       helpText,
-                       helpDesc,
-                       doLog);
+            Utils.AddCommand(permissions: "qol.builder",
+                cmd: BuilderCmd,
+                names: "builder",
+                allowServer: false,
+                helpText: "Instantiates the journey mode menu."
+            );
         }
 
         private static void BuilderCmd(CommandArgs args)
@@ -136,8 +81,8 @@ namespace QoL
             BitsByte misc = new BitsByte();
             BitsByte pernamentupgr = new BitsByte();
 
-            plrdifficulty[0] = plrdifficulty[1] = false; 
-            plrdifficulty[2] = args.TPlayer.extraAccessory; 
+            plrdifficulty[0] = plrdifficulty[1] = false;
+            plrdifficulty[2] = args.TPlayer.extraAccessory;
             plrdifficulty[3] = true; //creative mode, tshock doc did not update this (and a lot more other things) lead to falsely transfered information
             misc[0] = args.TPlayer.UsingBiomeTorches;
             misc[1] = args.TPlayer.happyFunTorchTime;
@@ -294,69 +239,23 @@ namespace QoL
                 return;
             }
 
-            if (OngoingVoteActive)
+            string targetName = string.Join(" ", args.Parameters.GetRange(0, args.Parameters.Count));
+
+            List<TSPlayer> matchedPlayers = TSPlayer.FindByNameOrID(targetName);
+
+            if (matchedPlayers.Count == 0)
             {
-                args.Player.SendErrorMessage("There is already an ongoing voting. Please wait till it ends.");
+                args.Player.SendErrorMessage("Player not found.");
                 return;
             }
 
-            string targetName = string.Join(" ", args.Parameters.GetRange(1, args.Parameters.Count - 1));
-
-            foreach (TSPlayer p in TShock.Players)
+            if (matchedPlayers.Count > 1)
             {
-                if (p == null || !p.Active)
-                {
-                    continue;
-                }
-
-                if (p.Name.Equals(targetName))
-                {
-                    OngoingVoteUUID = p.UUID;
-                    OngoingVoteIPAddress = p.IP;
-                    OngoingVoteAccountName = p.Account.Name;
-                    OngoingVoteInGameName = p.Name;
-                    OngoingVoteType = 0;
-                    OngoingVoteCount = 1;
-                    OngoingVoteActive = true;
-                    break;
-                }
-                else if (p.Name.ToLower().StartsWith(targetName.ToLower()))
-                {
-                    OngoingVoteUUID = p.UUID;
-                    OngoingVoteIPAddress = p.IP;
-                    OngoingVoteAccountName = p.Account.Name;
-                    OngoingVoteInGameName = p.Name;
-                    OngoingVoteType = 0;
-                    OngoingVoteCount = 1;
-                    OngoingVoteActive = true;
-                }
-            }
-
-            if (!OngoingVoteActive)
-            {
-                args.Player.SendErrorMessage($"{targetName} was not found.");
+                args.Player.SendErrorMessage("Found multiple players. Please be more specific.");
                 return;
             }
 
-            OngoingVoters.Add(args.Player.Name, true);
-            TSPlayer.All.SendInfoMessage($"{args.Player.Name} has started votekick against {OngoingVoteInGameName}. Type \"/vote [y/n]\" to vote.");
-
-            Task.Run(async () =>
-            {
-                await Task.Delay(60000);
-                if (OngoingVoteCount >= TShock.Utils.GetActivePlayerCount() / 2 + 1)
-                {
-                    TShockAPI.Commands.HandleCommand(TSPlayer.Server, $"/kick \"{OngoingVoteInGameName}\" \"Vote kicked.\"");
-                    TSPlayer.All.SendInfoMessage($"{OngoingVoteInGameName} has been vote kicked.");
-                }
-                else
-                {
-                    TSPlayer.All.SendInfoMessage($"Not enough votes to kick {OngoingVoteInGameName}.");
-                }
-
-                OngoingVoters = new Dictionary<string, bool>();
-                OngoingVoteActive = false;
-            });
+            VoteService.StartVote(args.Player, matchedPlayers.First(), VoteType.Kick);
         }
 
         private static void VotebanCmd(CommandArgs args)
@@ -367,123 +266,44 @@ namespace QoL
                 return;
             }
 
-            if (OngoingVoteActive)
+            string targetName = string.Join(" ", args.Parameters.GetRange(0, args.Parameters.Count));
+
+            List<TSPlayer> matchedPlayers = TSPlayer.FindByNameOrID(targetName);
+
+            if (matchedPlayers.Count == 0)
             {
-                args.Player.SendErrorMessage("There is already an ongoing vote. Please wait till it ends.");
+                args.Player.SendErrorMessage("Player not found.");
                 return;
             }
 
-            string targetName = string.Join(" ", args.Parameters.GetRange(1, args.Parameters.Count - 1));
-
-            foreach (TSPlayer p in TShock.Players)
+            if (matchedPlayers.Count > 1)
             {
-                if (p == null || !p.Active)
-                {
-                    continue;
-                }
-
-                if (p.Name.Equals(targetName))
-                {
-                    OngoingVoteUUID = p.UUID;
-                    OngoingVoteIPAddress = p.IP;
-                    OngoingVoteAccountName = p.Account.Name;
-                    OngoingVoteInGameName = p.Name;
-                    OngoingVoteType = 1;
-                    OngoingVoteCount = 1;
-                    OngoingVoteActive = true;
-                    break;
-                }
-                else if (p.Name.ToLower().StartsWith(targetName.ToLower()))
-                {
-                    OngoingVoteUUID = p.UUID;
-                    OngoingVoteIPAddress = p.IP;
-                    OngoingVoteAccountName = p.Account.Name;
-                    OngoingVoteInGameName = p.Name;
-                    OngoingVoteType = 1;
-                    OngoingVoteCount = 1;
-                    OngoingVoteActive = true;
-                }
-            }
-
-            if (!OngoingVoteActive)
-            {
-                args.Player.SendErrorMessage($"{targetName} was not found.");
+                args.Player.SendErrorMessage("Found multiple players. Please be more specific.");
                 return;
             }
 
-            OngoingVoters.Add(args.Player.Name, true);
-            TSPlayer.All.SendInfoMessage($"{args.Player.Name} has started voteban against {OngoingVoteInGameName}. ({OngoingVoteCount}/{TShock.Utils.GetActivePlayerCount() / 2 + 1})\nType \"/vote [y/n]\" to vote.");
-
-            Task.Run(async () =>
-            {
-                await Task.Delay(60000);
-                if (OngoingVoteCount >= TShock.Utils.GetActivePlayerCount() / 2 + 1)
-                {
-                    TShockAPI.Commands.HandleCommand(TSPlayer.Server, $"/kick \"{OngoingVoteInGameName}\" \"Vote banned.\"");
-                    TShockAPI.Commands.HandleCommand(TSPlayer.Server, $"/ban add \"acc:{OngoingVoteAccountName}\" \"Vote banned.\" {QoL.Config.VotebanTimeInMinutes}m -e");
-                    TShockAPI.Commands.HandleCommand(TSPlayer.Server, $"/ban add \"ip:{OngoingVoteIPAddress}\" \"Vote banned.\" {QoL.Config.VotebanTimeInMinutes}m -e");
-                    TShockAPI.Commands.HandleCommand(TSPlayer.Server, $"/ban add \"uuid:{OngoingVoteUUID}\" \"Vote banned.\" {QoL.Config.VotebanTimeInMinutes}m -e");
-                    TSPlayer.All.SendInfoMessage($"{OngoingVoteInGameName} has been vote banned for {QoL.Config.VotebanTimeInMinutes} mins.");
-                }
-                else
-                {
-                    TSPlayer.All.SendInfoMessage($"Not enough votes to kick {OngoingVoteInGameName}.");
-                }
-
-                OngoingVoters = new Dictionary<string, bool>();
-                OngoingVoteActive = false;
-            });
+            VoteService.StartVote(args.Player, matchedPlayers.First(), VoteType.Ban);
         }
 
         private static void VoteCmd(CommandArgs args)
         {
-            if (!OngoingVoteActive)
-            {
-                args.Player.SendErrorMessage("There is not an ongoing voting process");
-                return;
-            }
-
             if (args.Parameters.Count < 1)
             {
-                args.Player.SendErrorMessage("Please specify y or n. Usage: /vote <y/n>");
+                args.Player.SendErrorMessage("Please specify a y or n. (/vote [y/n])");
                 return;
             }
 
-            string typeText = OngoingVoteType == 0 ? "kicking" : "banning";
-
-            if (args.Parameters[0].ToLower().StartsWith("y"))
+            switch (args.Parameters[0].ToLower()[0])
             {
-                if (OngoingVoters.ContainsKey(args.Player.Name))
-                {
-                    if (OngoingVoters[args.Player.Name])
-                    {
-                        args.Player.SendErrorMessage("You've already voted \"y\"");
-                        return;
-                    }
-                    OngoingVoters[args.Player.Name] = true;
-                }
-
-                OngoingVoteCount++;
-                TSPlayer.All.SendInfoMessage($"{args.Player.Name} has voted [c/22DD22:for] {typeText} {OngoingVoteInGameName}. ({OngoingVoteCount}/{TShock.Utils.GetActivePlayerCount() / 2 + 1})");
-            }
-            else if (args.Parameters[0].ToLower().StartsWith("n"))
-            {
-                if (OngoingVoters.ContainsKey(args.Player.Name))
-                {
-                    if (!OngoingVoters[args.Player.Name])
-                    {
-                        args.Player.SendErrorMessage("You've already voted \"n\"");
-                        return;
-                    }
-                    OngoingVoters[args.Player.Name] = false;
-                }
-
-                OngoingVoteCount--;
-                TSPlayer.All.SendInfoMessage($"{args.Player.Name} has voted [c/DD2222:against] {typeText} {OngoingVoteInGameName}. ({OngoingVoteCount}/{TShock.Utils.GetActivePlayerCount() / 2 + 1})");
-            }
-            else
-            {
-                args.Player.SendErrorMessage("Please specify a y or n. (/vote [y/n])");
+                case 'y':
+                    VoteService.TryAddVote(args.Player, true);
+                    break;
+                case 'n':
+                    VoteService.TryAddVote(args.Player, false);
+                    break;
+                default:
+                    args.Player.SendErrorMessage("Please specify a y or n. (/vote [y/n])");
+                    break;
             }
         }
 

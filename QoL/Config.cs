@@ -11,6 +11,7 @@ namespace QoL
         public bool LockDungeonChestsTillSkeletron = true;
         public bool LockShadowChestsTillSkeletron = true;
         public int VotebanTimeInMinutes = 60;
+        public int VoteDurationInMinutes = 1;
         public bool DisableQuickStack = false;
         public bool EnableNameWhitelist = false;
         public string[] WhitelistedNames = new string[0];
@@ -26,11 +27,9 @@ namespace QoL
 
             if (File.Exists(QoL.ConfigPath)) c = JsonConvert.DeserializeObject<Config>(File.ReadAllText(QoL.ConfigPath));
 
-            if (c == null)
-            {
-                c = new Config();
-                File.WriteAllText(QoL.ConfigPath, JsonConvert.SerializeObject(c, Formatting.Indented));
-            }
+            c ??= new Config();
+
+            File.WriteAllText(QoL.ConfigPath, JsonConvert.SerializeObject(c, Formatting.Indented));
 
             return c;
         }

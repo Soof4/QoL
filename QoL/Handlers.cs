@@ -153,11 +153,7 @@ namespace QoL
 
         public static void OnServerLeave(LeaveEventArgs args)
         {
-            if (Commands.OngoingVoters.ContainsKey(Main.player[args.Who].name))
-            {
-                Commands.OngoingVoteCount += Commands.OngoingVoters[Main.player[args.Who].name] ? -1 : 1;
-                Commands.OngoingVoters.Remove(Main.player[args.Who].name);
-            }
+            VoteService.TryRemoveVote(args.Who);
         }
 
         private static void OnNpcLootDrop(NpcLootDropEventArgs args)
