@@ -237,9 +237,8 @@ namespace QoL
                 NPC queenBee = Main.npc[queenIndex];
 
                 bool isFarAway = true;
-                for (int i = 0; i < TShock.Config.Settings.MaxSlots + TShock.Config.Settings.ReservedSlots; i++)
+                foreach (TSPlayer plr in TShock.Players)
                 {
-                    TSPlayer? plr = TShock.Players[i];
                     if (plr != null && plr.Active && !plr.Dead && queenBee.position.WithinRange(plr.TPlayer.position, 16 * 450))
                     {
                         isFarAway = false;
