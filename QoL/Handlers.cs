@@ -25,7 +25,7 @@ namespace QoL
                 GetDataHandlers.ChestOpen += OnChestOpen;
             }
 
-            if (QoL.Config.QueenBeeRangeCheck)
+            if (QoL.Config.QueenBeeRangeCheck || QoL.Config.DeerclopsRangeCheck)
             {
                 ServerApi.Hooks.GameUpdate.Register(QoL.Instance, OnGameUpdate);
                 ServerApi.Hooks.NpcSpawn.Register(QoL.Instance, OnNpcSpawn);
@@ -103,7 +103,7 @@ namespace QoL
                 ServerApi.Hooks.NpcLootDrop.Deregister(QoL.Instance, OnNpcLootDrop);
             }
 
-            if (QoL.Config.QueenBeeRangeCheck)
+            if (QoL.Config.QueenBeeRangeCheck || QoL.Config.DeerclopsRangeCheck)
             {
                 ServerApi.Hooks.GameUpdate.Register(QoL.Instance, OnGameUpdate);
                 ServerApi.Hooks.NpcSpawn.Register(QoL.Instance, OnNpcSpawn);
@@ -230,11 +230,11 @@ namespace QoL
 
         private static void OnNpcSpawn(NpcSpawnEventArgs args)
         {
-            if (Main.npc[args.NpcId].netID == NPCID.QueenBee)
+            if (Main.npc[args.NpcId].netID == NPCID.QueenBee && QoL.Config.QueenBeeRangeCheck)
             {
                 QoL.QueenBeeIndexList.Add(args.NpcId);
             }
-            else if (Main.npc[args.NpcId].netID == NPCID.Deerclops)
+            else if (Main.npc[args.NpcId].netID == NPCID.Deerclops && QoL.Config.DeerclopsRangeCheck)
             {
                 QoL.DeerclopsIndexList.Add(args.NpcId);
             }
@@ -243,61 +243,67 @@ namespace QoL
         private static void OnGameUpdate(EventArgs args)
         {
             // Queen bee despawn
-            int[] qbIndexesToRemove = { };
-            foreach (int queenIndex in QoL.QueenBeeIndexList)
+            if (QoL.Config.QueenBeeRangeCheck)
             {
-                NPC queenBee = Main.npc[queenIndex];
-
-                bool isFarAway = true;
-                foreach (TSPlayer plr in TShock.Players)
+                int[] qbIndexesToRemove = { };
+                foreach (int queenIndex in QoL.QueenBeeIndexList)
                 {
-                    if (plr != null && plr.Active && !plr.Dead && queenBee.position.WithinRange(plr.TPlayer.position, 16 * 450))
+                    NPC queenBee = Main.npc[queenIndex];
+
+                    bool isFarAway = true;
+                    foreach (TSPlayer plr in TShock.Players)
                     {
-                        isFarAway = false;
+                        if (plr != null && plr.Active && !plr.Dead && queenBee.position.WithinRange(plr.TPlayer.position, 16 * 450))
+                        {
+                            isFarAway = false;
+                        }
+                    }
+
+                    if (isFarAway)
+                    {
+                        queenBee.active = false;
+                        queenBee.type = 0;
+                        qbIndexesToRemove.Append(queenIndex);
+                        NetMessage.SendData((int)PacketTypes.NpcUpdate, number: queenIndex);
                     }
                 }
 
-                if (isFarAway)
+                foreach (int index in qbIndexesToRemove)
                 {
-                    queenBee.active = false;
-                    queenBee.type = 0;
-                    qbIndexesToRemove.Append(queenIndex);
-                    NetMessage.SendData((int)PacketTypes.NpcUpdate, number: queenIndex);
+                    QoL.QueenBeeIndexList.Remove(index);
                 }
-            }
-
-            foreach (int index in qbIndexesToRemove)
-            {
-                QoL.QueenBeeIndexList.Remove(index);
             }
 
             // Deerclops despawn
-            int[] dcIndexesToRemove = { };
-            foreach (int dcIndex in QoL.DeerclopsIndexList)
+            if (QoL.Config.DeerclopsRangeCheck)
             {
-                NPC dc = Main.npc[dcIndex];
-
-                bool isFarAway = true;
-                foreach (TSPlayer plr in TShock.Players)
+                int[] dcIndexesToRemove = { };
+                foreach (int dcIndex in QoL.DeerclopsIndexList)
                 {
-                    if (plr != null && plr.Active && !plr.Dead && dc.position.WithinRange(plr.TPlayer.position, 16 * 450))
+                    NPC dc = Main.npc[dcIndex];
+
+                    bool isFarAway = true;
+                    foreach (TSPlayer plr in TShock.Players)
                     {
-                        isFarAway = false;
+                        if (plr != null && plr.Active && !plr.Dead && dc.position.WithinRange(plr.TPlayer.position, 16 * 450))
+                        {
+                            isFarAway = false;
+                        }
+                    }
+
+                    if (isFarAway)
+                    {
+                        dc.active = false;
+                        dc.type = 0;
+                        dcIndexesToRemove.Append(dcIndex);
+                        NetMessage.SendData((int)PacketTypes.NpcUpdate, number: dcIndex);
                     }
                 }
 
-                if (isFarAway)
+                foreach (int index in dcIndexesToRemove)
                 {
-                    dc.active = false;
-                    dc.type = 0;
-                    dcIndexesToRemove.Append(dcIndex);
-                    NetMessage.SendData((int)PacketTypes.NpcUpdate, number: dcIndex);
+                    QoL.QueenBeeIndexList.Remove(index);
                 }
-            }
-
-            foreach (int index in dcIndexesToRemove)
-            {
-                QoL.QueenBeeIndexList.Remove(index);
             }
         }
     }
