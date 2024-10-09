@@ -10,6 +10,7 @@ namespace QoL
         public bool QueenBeeRangeCheck = true;
         public bool LockDungeonChestsTillSkeletron = true;
         public bool LockShadowChestsTillSkeletron = true;
+        public bool LockTempleChestsTillPlantera = true;
         public int VotebanTimeInMinutes = 60;
         public int VoteDurationInMinutes = 1;
         public bool DisableQuickStack = false;

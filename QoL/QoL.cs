@@ -11,7 +11,7 @@ namespace QoL
     {
 
         public override string Name => "QoL";
-        public override Version Version => new Version(1, 2, 8);
+        public override Version Version => new Version(1, 2, 9);
         public override string Author => "Soofa & Sors";
         public override string Description => "Quality of life.";
 
@@ -19,6 +19,7 @@ namespace QoL
         public static TerrariaPlugin? Instance;
         public static DateTime time = DateTime.UtcNow;
         public static List<int> QueenBeeIndexList = new();
+        public static List<int> DeerclopsIndexList = new();
         public static int[] DungeonWallIDs = { 7, 8, 9, 94, 95, 96, 97, 98, 99 };
         public static string ConfigPath = Path.Combine(TShock.SavePath + "/QoLConfig.json");
         public static Config Config = new Config();

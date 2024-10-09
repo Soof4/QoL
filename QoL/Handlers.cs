@@ -212,10 +212,17 @@ namespace QoL
             {
                 args.Handled = true;
             }
-            else if (QoL.Config.LockShadowChestsTillSkeletron &&
+            if (QoL.Config.LockShadowChestsTillSkeletron &&
                 Main.tile[args.X, args.Y].type == 21 &&
                 Main.tile[args.X, args.Y].frameX / 36 == 3 &&
                 !NPC.downedBoss3)
+            {
+                args.Handled = true;
+            }
+            if (QoL.Config.LockTempleChestsTillPlantera &&
+                Main.tile[args.X, args.Y].type == 21 &&
+                Main.tile[args.X, args.Y].frameX / 36 == 16 &&
+                !NPC.downedPlantBoss)
             {
                 args.Handled = true;
             }
@@ -227,11 +234,16 @@ namespace QoL
             {
                 QoL.QueenBeeIndexList.Add(args.NpcId);
             }
+            else if (Main.npc[args.NpcId].netID == NPCID.Deerclops)
+            {
+                QoL.DeerclopsIndexList.Add(args.NpcId);
+            }
         }
 
         private static void OnGameUpdate(EventArgs args)
         {
-            int[] indexesToRemove = { };
+            // Queen bee despawn
+            int[] qbIndexesToRemove = { };
             foreach (int queenIndex in QoL.QueenBeeIndexList)
             {
                 NPC queenBee = Main.npc[queenIndex];
@@ -249,12 +261,41 @@ namespace QoL
                 {
                     queenBee.active = false;
                     queenBee.type = 0;
-                    indexesToRemove.Append(queenIndex);
+                    qbIndexesToRemove.Append(queenIndex);
                     NetMessage.SendData((int)PacketTypes.NpcUpdate, number: queenIndex);
                 }
             }
 
-            foreach (int index in indexesToRemove)
+            foreach (int index in qbIndexesToRemove)
+            {
+                QoL.QueenBeeIndexList.Remove(index);
+            }
+
+            // Deerclops despawn
+            int[] dcIndexesToRemove = { };
+            foreach (int dcIndex in QoL.DeerclopsIndexList)
+            {
+                NPC dc = Main.npc[dcIndex];
+
+                bool isFarAway = true;
+                foreach (TSPlayer plr in TShock.Players)
+                {
+                    if (plr != null && plr.Active && !plr.Dead && dc.position.WithinRange(plr.TPlayer.position, 16 * 450))
+                    {
+                        isFarAway = false;
+                    }
+                }
+
+                if (isFarAway)
+                {
+                    dc.active = false;
+                    dc.type = 0;
+                    dcIndexesToRemove.Append(dcIndex);
+                    NetMessage.SendData((int)PacketTypes.NpcUpdate, number: dcIndex);
+                }
+            }
+
+            foreach (int index in dcIndexesToRemove)
             {
                 QoL.QueenBeeIndexList.Remove(index);
             }
