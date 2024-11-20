@@ -17,7 +17,7 @@ public class Config
     public bool DisableQuickStack = false;
     public bool EnableNameWhitelist = false;
     public string[] WhitelistedNames = new string[0];
-    public Dictionary<string, int> CommandCooldowns = new Dictionary<string, int>();
+    public Dictionary<string, string> CommandAliases = new Dictionary<string, string>();
 
     public void Write()
     {

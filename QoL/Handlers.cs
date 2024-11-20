@@ -46,6 +46,7 @@ public static class Handlers
     {
         QoL.Config = Config.Reload();
         ReloadHandlers();
+        Commands.ReloadCommands();
         args.Player.SendSuccessMessage("[QoL] Reloaded.");
     }
 
@@ -141,6 +142,7 @@ public static class Handlers
     private static void OnGamePostInitialize(EventArgs args)
     {
         Main.rand ??= new();
+        Commands.ReloadCommands();
     }
 
     private static void OnServerJoin(JoinEventArgs args)

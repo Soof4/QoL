@@ -89,6 +89,20 @@ public static class Commands
         );
     }
 
+    public static void ReloadCommands()
+    {
+        foreach (var cap in QoL.Config.CommandAliases)
+        {
+            foreach (var cmd in TShockAPI.Commands.ChatCommands)
+            {
+                if (cmd.Names.Contains(cap.Key) && !cmd.Names.Contains(cap.Value))
+                {
+                    cmd.Names.Add(cap.Value);
+                }
+            }
+        }
+    }
+
     private static void BuilderCmd(CommandArgs args)
     {
         BitsByte plrdifficulty = new BitsByte();
