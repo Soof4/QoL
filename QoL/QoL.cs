@@ -8,7 +8,7 @@ namespace QoL;
 public class QoL : TerrariaPlugin
 {
     public override string Name => "QoL";
-    public override Version Version => new Version(1, 2, 10);
+    public override Version Version => new Version(1, 3, 1);
     public override string Author => "Soofa & Sors";
     public override string Description => "Quality of life.";
 
