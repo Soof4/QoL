@@ -1,10 +1,52 @@
 using Terraria;
+using Terraria.ID;
 using TShockAPI;
 
 namespace QoL;
 
 public static class Utils
 {
+    public static int[] TownNPCs = new int[] {
+        NPCID.Angler,
+        NPCID.ArmsDealer,
+        NPCID.Clothier,
+        NPCID.Demolitionist,
+        NPCID.Dryad,
+        NPCID.DyeTrader,
+        NPCID.GoblinTinkerer,
+        NPCID.Golfer,
+        NPCID.Guide,
+        NPCID.Mechanic,
+        NPCID.Merchant,
+        NPCID.Nurse,
+        NPCID.OldMan,
+        NPCID.Painter,
+        NPCID.PartyGirl,
+        NPCID.Stylist,
+        NPCID.DD2Bartender,
+        NPCID.TravellingMerchant,
+        NPCID.WitchDoctor,
+        NPCID.BestiaryGirl,
+        NPCID.Cyborg,
+        NPCID.Pirate,
+        NPCID.Princess,
+        NPCID.SantaClaus,
+        NPCID.Steampunker,
+        NPCID.TaxCollector,
+        NPCID.Truffle,
+        NPCID.Wizard,
+        NPCID.TownCat,
+        NPCID.TownDog,
+        NPCID.TownBunny,
+        NPCID.TownSlimeBlue,
+        NPCID.TownSlimeCopper,
+        NPCID.TownSlimeGreen,
+        NPCID.TownSlimeOld,
+        NPCID.TownSlimePurple,
+        NPCID.TownSlimeRainbow,
+        NPCID.TownSlimeRed,
+        NPCID.TownSlimeYellow
+    };
 
     public static string GetDamageTypeText(this Item item)
     {
