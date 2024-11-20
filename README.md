@@ -14,6 +14,7 @@ If you want to read this in another language: [Spanish](https://github.com/Soof4
 | qol.vote     | vote         |
 | qol.iteminfo | iteminfo, ii |
 | qol.builder  | builder      |
+| qol.tpn      | tpn          |
 
 ## Features
 
@@ -27,6 +28,7 @@ If you want to read this in another language: [Spanish](https://github.com/Soof4
 - New command `/voteban <player name>` will start a voting process to ban the target player.
 - New command `/vote <y/n>` will vote for/against the current voting process.
 - New command `/iteminfo <item name>` will show information about the item.
+- New command `/tpn <npc name>` will teleport player to the town NPCs only.
 - New whitelist system based on character names.
 
 ## Configuration
