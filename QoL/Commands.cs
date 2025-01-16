@@ -87,6 +87,14 @@ public static class Commands
             allowServer: false,
             helpText: "Teleports to town NPCs only."
         );
+
+        Utils.AddCommand(
+            permissions: "qol.banmobile",
+            cmd: BanMobileCmd,
+            names: new string[] { "banmobile", "banm" },
+            allowServer: true,
+            helpText: "A wrapper command of /ban for mobile users."
+        );
     }
 
     public static void ReloadCommands()
@@ -513,5 +521,12 @@ public static class Commands
         var target = matches[0];
         args.Player.Teleport(target.position.X, target.position.Y);
         args.Player.SendSuccessMessage("Teleported to the '{0}'.", target.FullName);
+    }
+
+    private static void BanMobileCmd(CommandArgs args)
+    {
+        string cmdSpecifier = args.Silent ? TShock.Config.Settings.CommandSilentSpecifier : TShock.Config.Settings.CommandSpecifier;
+        TShockAPI.Commands.HandleCommand(TSPlayer.Server, $"{cmdSpecifier}ban {args.Parameters[0]} \"{args.Parameters[1]}\" {string.Join(" ", args.Parameters.GetRange(2, args.Parameters.Count - 2))}");
+        args.Player.SendInfoMessage("Ban command has been executed, if the player is not kicked then there must be an error in the written command.");
     }
 }
