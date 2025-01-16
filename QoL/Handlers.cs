@@ -240,7 +240,60 @@ public static class Handlers
         {
             QoL.DeerclopsIndexList.Add(args.NpcId);
         }
+
+        return;
+
+        // CODE BELOW HAS NOT BEEN PROPERLY IMPLEMENTED YET ಥ_ಥ
+
+        var npc = Main.npc[args.NpcId];
+        // ScaleStats(spawnparams.playerCountForMultiplayerDifficultyOverride, spawnparams.gameModeData, spawnparams.strengthMultiplierOverride);
+        npc.SetDefaults(npc.netID, new NPCSpawnParams()
+        {
+            gameModeData = Main.GameModeInfo,
+            playerCountForMultiplayerDifficultyOverride = 1
+        });
+        //Main.npc[args.NpcId].statsAreScaledForThisManyPlayers = 100;
+        //Main.npc[args.NpcId].ScaleStats();
+
+        if (npc.boss)
+            Task.Run(async () =>
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    await Task.Delay(10000);
+
+                    npc.active = false;
+                    //TSPlayer.All.SendData(PacketTypes.NpcUpdate, number: args.NpcId);
+                    int prevLife = npc.life;
+                    int prevLifeMax = npc.lifeMax;
+
+                    npc.SetDefaults(npc.netID, new NPCSpawnParams()
+                    {
+                        gameModeData = Main.GameModeInfo,
+                        playerCountForMultiplayerDifficultyOverride = i * 10
+                    });
+
+                    npc.active = true;
+                    npc.life = prevLife + npc.lifeMax - prevLifeMax;
+                    TSPlayer.All.SendData(PacketTypes.NpcUpdate, number: args.NpcId);
+                    /*
+                    await Task.Delay(10000);
+                    int plusHp = (int)(npc.lifeMax * 0.5);
+                    npc.lifeMax += plusHp;
+                    npc.life += plusHp;
+
+                    TSPlayer.All.SendData(PacketTypes.NpcUpdate, number: args.NpcId);
+                    */
+                }
+            });
+
+
     }
+
+
+
+
+
 
     private static void OnGameUpdate(EventArgs args)
     {

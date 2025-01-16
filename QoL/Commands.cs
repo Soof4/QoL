@@ -251,8 +251,36 @@ public static class Commands
 
     private static void ExecuteCmd(CommandArgs args)
     {
-        string[] cmds = string.Join(" ", args.Parameters).Split("&");
+        string[] cmds = string.Join(' ', args.Parameters).Split("&");
 
+        // Check for any disallowed commands (I feel like this part can be optimized)
+        foreach (string cmd in cmds)
+        {
+            // Split the cmd name from its parameters
+            string cmdName = cmd.Split(' ')[0];
+            cmdName = cmdName[1..];
+
+            // Get aliases
+            List<string> cmdNames = new List<string>() { cmdName };
+
+            foreach (var tc in TShockAPI.Commands.ChatCommands)
+            {
+                if (tc.Names.Contains(cmdNames[0]))
+                {
+                    cmdNames.AddRange(tc.Names);
+                    cmdNames.RemoveAt(0);
+                }
+            }
+
+            // Check if any commands match
+            if (cmdNames.Any(c => QoL.Config.DisallowedExecuteCommands.Contains(c)))
+            {
+                args.Player.SendErrorMessage("Your execute command contains a disallowed command.");
+                return;
+            }
+        }
+
+        // Execution
         foreach (string cmd in cmds)
         {
             TShockAPI.Commands.HandleCommand(args.Player, cmd.Trim());

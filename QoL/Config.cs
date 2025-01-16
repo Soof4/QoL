@@ -18,11 +18,14 @@ public class Config
     public bool EnableNameWhitelist = false;
     public string[] WhitelistedNames = new string[0];
     public Dictionary<string, string> CommandAliases = new Dictionary<string, string>();
+    public string[] DisallowedExecuteCommands = { "=" };
+
 
     public void Write()
     {
         File.WriteAllText(QoL.ConfigPath, JsonConvert.SerializeObject(this, Formatting.Indented));
     }
+
 
     public static Config Reload()
     {
