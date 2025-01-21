@@ -13,7 +13,7 @@ public static class Handlers
     {
         public int NpcIndex { get; set; }
         public bool IsActive => Main.npc[NpcIndex].active && Main.npc[NpcIndex].boss;
-        public int CurrentMultiplier { get; set; } = 1;
+        public int CurrentMultiplier { get; set; } = 0;
         public NPC Npc => Main.npc[NpcIndex];
     }
     private static List<DynamicBoss> _dynamicBosses = new();
@@ -265,7 +265,11 @@ public static class Handlers
             QoL.DeerclopsIndexList.Add(args.NpcId);
         }
 
-        if (QoL.Config.DynamicBossHealth && Main.npc[args.NpcId].boss)
+        if (QoL.Config.DynamicBossHealth &&
+        Main.npc[args.NpcId].boss &&
+        Main.npc[args.NpcId].type != NPCID.MoonLordCore &&
+        Main.npc[args.NpcId].type != NPCID.MoonLordHand &&
+        Main.npc[args.NpcId].type != NPCID.MoonLordHead)
         {
             _dynamicBosses.Add(new DynamicBoss() { NpcIndex = args.NpcId });
         }
@@ -342,8 +346,8 @@ public static class Handlers
             if (newMultiplier > boss.CurrentMultiplier)
             {
                 boss.CurrentMultiplier = newMultiplier;
-                npc.active = false;
-                TSPlayer.All.SendData(PacketTypes.NpcUpdate, number: npc.whoAmI);
+                //npc.active = false;
+                //TSPlayer.All.SendData(PacketTypes.NpcUpdate, number: npc.whoAmI);
                 int prevLife = npc.life;
                 int prevLifeMax = npc.lifeMax;
 
