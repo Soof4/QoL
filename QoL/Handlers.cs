@@ -9,6 +9,15 @@ namespace QoL;
 
 public static class Handlers
 {
+    private class DynamicBoss
+    {
+        public int NpcIndex { get; set; }
+        public bool IsActive => Main.npc[NpcIndex].active && Main.npc[NpcIndex].boss;
+        public int CurrentMultiplier { get; set; } = 1;
+        public NPC Npc => Main.npc[NpcIndex];
+    }
+    private static List<DynamicBoss> _dynamicBosses = new();
+
     public static void InitializeHandlers()
     {
         ServerApi.Hooks.GamePostInitialize.Register(QoL.Instance, OnGamePostInitialize);
@@ -39,6 +48,11 @@ public static class Handlers
         if (QoL.Config.DisableQuickStack)
         {
             ServerApi.Hooks.ItemForceIntoChest.Register(QoL.Instance, OnItemForceIntoChest);
+        }
+
+        if (QoL.Config.DynamicBossHealth)
+        {
+            ServerApi.Hooks.GameUpdate.Register(QoL.Instance, OnGameUpdate_DynamicBossHealth);
         }
     }
 
@@ -131,6 +145,16 @@ public static class Handlers
         else
         {
             ServerApi.Hooks.ItemForceIntoChest.Deregister(QoL.Instance, OnItemForceIntoChest);
+        }
+
+        if (QoL.Config.DynamicBossHealth)
+        {
+            ServerApi.Hooks.GameUpdate.Register(QoL.Instance, OnGameUpdate_DynamicBossHealth);
+        }
+        else
+        {
+            ServerApi.Hooks.GameUpdate.Deregister(QoL.Instance, OnGameUpdate_DynamicBossHealth);
+
         }
     }
 
@@ -241,59 +265,100 @@ public static class Handlers
             QoL.DeerclopsIndexList.Add(args.NpcId);
         }
 
+        if (QoL.Config.DynamicBossHealth && Main.npc[args.NpcId].boss)
+        {
+            _dynamicBosses.Add(new DynamicBoss() { NpcIndex = args.NpcId });
+        }
+
         return;
 
-        // CODE BELOW HAS NOT BEEN PROPERLY IMPLEMENTED YET ಥ_ಥ
+        // CODE BELOW WAS LEFT FOR FUTURE REFERENCE
 
-        var npc = Main.npc[args.NpcId];
-        // ScaleStats(spawnparams.playerCountForMultiplayerDifficultyOverride, spawnparams.gameModeData, spawnparams.strengthMultiplierOverride);
-        npc.SetDefaults(npc.netID, new NPCSpawnParams()
-        {
-            gameModeData = Main.GameModeInfo,
-            playerCountForMultiplayerDifficultyOverride = 1
-        });
-        //Main.npc[args.NpcId].statsAreScaledForThisManyPlayers = 100;
-        //Main.npc[args.NpcId].ScaleStats();
+        // var npc = Main.npc[args.NpcId];
+        // // ScaleStats(spawnparams.playerCountForMultiplayerDifficultyOverride, spawnparams.gameModeData, spawnparams.strengthMultiplierOverride);
+        // npc.SetDefaults(npc.netID, new NPCSpawnParams()
+        // {
+        //     gameModeData = Main.GameModeInfo,
+        //     playerCountForMultiplayerDifficultyOverride = 1
+        // });
+        // //Main.npc[args.NpcId].statsAreScaledForThisManyPlayers = 100;
+        // //Main.npc[args.NpcId].ScaleStats();
 
-        if (npc.boss)
-            Task.Run(async () =>
-            {
-                for (int i = 0; i < 10; i++)
-                {
-                    await Task.Delay(10000);
+        // if (npc.boss)
+        //     Task.Run(async () =>
+        //     {
+        //         for (int i = 0; i < 10; i++)
+        //         {
+        //             await Task.Delay(10000);
 
-                    npc.active = false;
-                    //TSPlayer.All.SendData(PacketTypes.NpcUpdate, number: args.NpcId);
-                    int prevLife = npc.life;
-                    int prevLifeMax = npc.lifeMax;
+        //             npc.active = false;
+        //             TSPlayer.All.SendData(PacketTypes.NpcUpdate, number: args.NpcId);
+        //             int prevLife = npc.life;
+        //             int prevLifeMax = npc.lifeMax;
 
-                    npc.SetDefaults(npc.netID, new NPCSpawnParams()
-                    {
-                        gameModeData = Main.GameModeInfo,
-                        playerCountForMultiplayerDifficultyOverride = i * 10
-                    });
+        //             npc.SetDefaults(npc.netID, new NPCSpawnParams()
+        //             {
+        //                 gameModeData = Main.GameModeInfo,
+        //                 playerCountForMultiplayerDifficultyOverride = i * 10
+        //             });
 
-                    npc.active = true;
-                    npc.life = prevLife + npc.lifeMax - prevLifeMax;
-                    TSPlayer.All.SendData(PacketTypes.NpcUpdate, number: args.NpcId);
-                    /*
-                    await Task.Delay(10000);
-                    int plusHp = (int)(npc.lifeMax * 0.5);
-                    npc.lifeMax += plusHp;
-                    npc.life += plusHp;
+        //             npc.active = true;
+        //             npc.life = prevLife + npc.lifeMax - prevLifeMax;
+        //             TSPlayer.All.SendData(PacketTypes.NpcUpdate, number: args.NpcId);
+        //             /*
+        //             await Task.Delay(10000);
+        //             int plusHp = (int)(npc.lifeMax * 0.5);
+        //             npc.lifeMax += plusHp;
+        //             npc.life += plusHp;
 
-                    TSPlayer.All.SendData(PacketTypes.NpcUpdate, number: args.NpcId);
-                    */
-                }
-            });
-
-
+        //             TSPlayer.All.SendData(PacketTypes.NpcUpdate, number: args.NpcId);
+        //             */
+        //         }
+        //     });
     }
 
+    private static void OnGameUpdate_DynamicBossHealth(EventArgs args)
+    {
+        for (int i = _dynamicBosses.Count - 1; i >= 0; i--)
+        {
+            DynamicBoss boss = _dynamicBosses[i];
+            if (!boss.IsActive)
+            {
+                _dynamicBosses.RemoveAt(i);
+                continue;
+            }
 
+            NPC npc = boss.Npc;
 
+            int newMultiplier = 0;
+            foreach (TSPlayer plr in TShock.Players)
+            {
+                if (plr != null && plr.Active && npc.position.WithinRange(plr.TPlayer.position, QoL.Config.DynamicBossHealthRangeInBlocks * 16))
+                {
+                    newMultiplier++;
+                }
+            }
 
+            if (newMultiplier > boss.CurrentMultiplier)
+            {
+                boss.CurrentMultiplier = newMultiplier;
+                npc.active = false;
+                TSPlayer.All.SendData(PacketTypes.NpcUpdate, number: npc.whoAmI);
+                int prevLife = npc.life;
+                int prevLifeMax = npc.lifeMax;
 
+                npc.SetDefaults(npc.netID, new NPCSpawnParams()
+                {
+                    gameModeData = Main.GameModeInfo,
+                    playerCountForMultiplayerDifficultyOverride = boss.CurrentMultiplier
+                });
+
+                npc.active = true;
+                npc.life = prevLife + npc.lifeMax - prevLifeMax;
+                TSPlayer.All.SendData(PacketTypes.NpcUpdate, number: npc.whoAmI);
+            }
+        }
+    }
 
     private static void OnGameUpdate(EventArgs args)
     {

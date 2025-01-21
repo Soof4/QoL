@@ -19,7 +19,8 @@ public class Config
     public string[] WhitelistedNames = new string[0];
     public Dictionary<string, string> CommandAliases = new Dictionary<string, string>();
     public string[] DisallowedExecuteCommands = { "=" };
-
+    public bool DynamicBossHealth = true;
+    public int DynamicBossHealthRangeInBlocks = 400;
 
     public void Write()
     {
